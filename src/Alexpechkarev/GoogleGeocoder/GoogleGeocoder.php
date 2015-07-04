@@ -8,6 +8,8 @@
 
 namespace Alexpechkarev\GoogleGeocoder;
 
+use Cache;
+use Carbon\Carbon;
 
 class GoogleGeocoder {
 
@@ -46,6 +48,14 @@ class GoogleGeocoder {
     */
     protected $param;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Caching parameters
+    |--------------------------------------------------------------------------
+    |
+    */
+    protected $caching;
+
 
 
     /**
@@ -58,6 +68,7 @@ class GoogleGeocoder {
     {
         $this->applicationKey   = $config['applicationKey'];
         $this->requestUrl       = $config['requestUrl'];
+        $this->caching          = $config['caching'];
     }
 
 
@@ -85,6 +96,17 @@ class GoogleGeocoder {
 
         curl_close($curl);
 
+        if ($this->caching['enabled'] === true) {
+          if (is_int($this->caching['duration'])) {
+            $expires = Carbon::now()->addMinutes($this->caching['duration']);
+
+            Cache::put($this->caching['key'], serialize($request), $expires);
+          }
+          elseif ($this->caching['duration'] == 'forever') {
+            Cache::forever($this->caching['key'], serialize($request));
+          }
+        }
+
         return $request;
     }
 
@@ -102,6 +124,14 @@ class GoogleGeocoder {
         $this->format     = array_key_exists($format, $this->requestUrl) ? $format : 'json';
         $param['key']     = $this->applicationKey;
         $this->param      = http_build_query($param);
+
+        if ($this->caching['enabled'] === true) {
+          $this->caching['key'] = md5($this->param);
+
+          if (Cache::has($this->caching['key'])) {
+            return unserialize(Cache::get($this->caching['key']));
+          }
+        }
 
         return $this->call();
     }

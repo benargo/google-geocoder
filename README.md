@@ -71,6 +71,22 @@ return [
         'json' => 'https://maps.googleapis.com/maps/api/geocode/json?',
         'xml'  => 'https://maps.googleapis.com/maps/api/geocode/xml?'
     ],
+
+		/*
+		|--------------------------------------------------------------------------
+		| Caching
+		|--------------------------------------------------------------------------
+		|
+		| If you want to cache the results returned using Laravel's caching feature
+		| then change 'enabled' to true. By default results are cached for 1 day,
+		| but if you want to change this then change the 'default_duration' to
+		| either reflect the number of minutes you want, or set it as 'forever' if
+		| you want to cache the results permanently.
+		*/
+		'caching' => [
+				'enabled'	 => false,
+				'duration' => 1440,
+		],
 ];
 ```
 
